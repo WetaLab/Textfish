@@ -55,7 +55,7 @@ export async function analyzeConversationFromText(conversationText) {
   console.log("Analyzing")
   const model = genAI.getGenerativeModel({
     model: "gemini-2.5-pro",
-    systemInstruction: YOUR_SYSTEM_PROMPT_HERE,
+    systemInstruction: SYSTEM_PROMPT,
   });
 
   const result = await model.generateText(conversationText);
