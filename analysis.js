@@ -1,0 +1,22 @@
+export const Classification = {
+  SUPERBRILLIANT: "Superbrilliant",
+  BRILLIANT: "Brilliant",
+  GREAT: "Great",
+  BEST: "Best",
+  EXCELLENT: "Excellent",
+  GOOD: "Good",
+  BOOK: "Book",
+  INACCURACY: "Inaccuracy",
+  MISTAKE: "Mistake",
+  MISS: "Miss",
+  BLUNDER: "Blunder",
+  MEGABLUNDER: "Megablunder",
+  FORCED: "Forced",
+  INTERESTING: "Interesting",
+  ABANDON: "Abandon",
+  CHECKMATED: "Checkmated",
+  DRAW: "Draw",
+  RESIGN: "Resign",
+  TIMEOUT: "Timeout",
+  WINNER: "Winner"
+};

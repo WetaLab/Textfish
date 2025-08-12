@@ -1,0 +1,16 @@
+{
+  "name": "TextingTheory",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.7.0",
+    "canvas": "^2.11.2",
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.6.1",
+    "node-fetch": "^3.3.2"
+  }
+}
