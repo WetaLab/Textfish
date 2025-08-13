@@ -163,13 +163,13 @@ export default {
       "Excellent",
       "Good",
       "Book",
+      "Interesting",
       "Inaccuracy",
       "Mistake",
       "Miss",
       "Blunder",
       "Megablunder",
       "Forced",
-      "Interesting",
     ];
 
     const tally = {};
