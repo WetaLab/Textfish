@@ -9,7 +9,7 @@ export default {
       status: "idle", 
       activities: [
         {
-          name: "& Analyzing Text Games",
+          name: "& Analyzing Text Interactions",
           type: ActivityType.Watching, 
         },
       ],
