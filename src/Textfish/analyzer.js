@@ -47,7 +47,7 @@ Forced: Realistically the only message that makes sense here.
 Interesting: Could realistically go either way, it just depends on how the opponent reacts.
 Result classifications
 Abandon: A player leaves abruptly.
-Checkmated: A player gives in to the play of the opponent.
+Checkmated: A player gives in to the play of the opponent. A victor is declared.
 Draw: One or both player(s) settle.
 Resign: A player gives up.
 Timeout: A player took too long.
@@ -114,7 +114,7 @@ Forced: Realistically the only message that makes sense here.
 Interesting: Could realistically go either way, it just depends on how the opponent reacts.
 Result classifications
 Abandon: A player leaves abruptly.
-Checkmated: A player gives in to the play of the opponent.
+Checkmated: A player gives in to the play of the opponent. A victor is declared.
 Draw: One or both player(s) settle.
 Resign: A player gives up.
 Timeout: A player took too long.
