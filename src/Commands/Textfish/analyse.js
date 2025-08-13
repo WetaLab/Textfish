@@ -13,6 +13,55 @@ import {
   MessageFlags,
 } from "discord.js";
 
+const unicodes = {
+  SUPERBRILLIANT: " (!!!)",
+  BRILLIANT: " (!!)",
+  GREAT: " (!)",
+  BEST: " (★)",
+  MISTAKE: " (?)",
+  MISS: " (X)",
+  BLUNDER: " (??)",
+  MEGABLUNDER: " (???)",
+};
+
+const CLASSIFICATION_ACCURACY_INFO = {
+  SUPERBRILLIANT: { accuracy: 100, radius: 0 },
+  BRILLIANT: { accuracy: 100, radius: 0 },
+  GREAT: { accuracy: 100, radius: 0 },
+  BEST: { accuracy: 100, radius: 0 },
+  EXCELLENT: { accuracy: 99, radius: 1 },
+  GOOD: { accuracy: 96.5, radius: 1.5 },
+  BOOK: { accuracy: 100, radius: 2 },
+  INACCURACY: { accuracy: -7.5, radius: 2.5 },
+  MISTAKE: { accuracy: -15, radius: 5 },
+  MISS: { accuracy: -10, radius: 3 },
+  BLUNDER: { accuracy: -60, radius: 40 },
+  MEGABLUNDER: { accuracy: -100, radius: 0 },
+};
+
+function getClassificationAccuracy(classification) {
+  const { accuracy, radius } = CLASSIFICATION_ACCURACY_INFO[classification];
+  const jitter = (Math.random() * 2 - 1) * radius;
+  return Math.min(100, accuracy + jitter);
+}
+
+function getAccuracyString(messages, side) {
+  const playerMessages = messages.filter((msg) => msg.side == side);
+  let totalScore = 0;
+  let classifiedMovesCount = 0;
+
+  for (const msg of playerMessages) {
+    if (CLASSIFICATION_ACCURACY_INFO[msg.classification.toUpperCase()]) {
+      totalScore += getClassificationAccuracy(msg.classification.toUpperCase());
+      classifiedMovesCount++;
+    }
+  }
+
+  if (classifiedMovesCount === 0) return "0.0";
+  const averageAccuracy = totalScore / classifiedMovesCount;
+  return Math.min(100, Math.max(0, averageAccuracy)).toFixed(1);
+}
+
 function convertMessages(data) {
   return data.messages.map((msg) => {
     const username = data.opponents[msg.side] || "Unknown";
@@ -57,13 +106,12 @@ export default {
     const messagesArray = fetched
       .filter(
         (msg) =>
-          msg.content && 
+          msg.content &&
           msg.content.trim() !== "" &&
           msg.author.id !== client.user.id
       )
       .map((msg) => `${msg.author.username}: ${msg.content}`);
 
-    console.log(fetched, messagesArray);
 
     const fAnalyzing = new ContainerBuilder().addTextDisplayComponents(
       new TextDisplayBuilder().setContent("Analyzing...")
@@ -119,6 +167,8 @@ export default {
       "Miss",
       "Blunder",
       "Megablunder",
+      "Forced",
+      "Interesting"
     ];
 
     const tally = {};
@@ -139,10 +189,32 @@ export default {
     const leftHeader = analysis.opponents.left;
     const rightHeader = analysis.opponents.right;
 
+    var tallyFormatted = {};
+
+    for (const classification in tally) {
+      if (unicodes[classification.toUpperCase()]) {
+        tallyFormatted[
+          `${classification}${unicodes[classification.toUpperCase()]}`
+        ] = tally[classification];
+      } else {
+        let left = tally[classification].left;
+        let right = tally[classification].left;
+        if (left == 0 && right == 0) {
+        } else {
+          tallyFormatted[classification] = tally[classification];
+        }
+      }
+    }
+
     const rows = [
-      ["Classification", leftHeader, rightHeader],
-      ...Object.entries(tally).map(([classification, counts]) => [
-        classification,
+      [" ", leftHeader, rightHeader],
+      [
+        "Accuracy",
+        getAccuracyString(analysis.messages, "left"),
+        getAccuracyString(analysis.messages, "right"),
+      ],
+      ...Object.entries(tallyFormatted).map(([classification, counts]) => [
+        `${classification}`,
         counts.left.toString(),
         counts.right.toString(),
       ]),
@@ -165,9 +237,7 @@ export default {
       table +=
         "| " +
         row
-          .map(
-            (cell, i) => pad(cell, colWidths[i], i > 0 && rowIndex > 0) 
-          )
+          .map((cell, i) => pad(cell, colWidths[i], i > 0 && rowIndex > 0))
           .join(" | ") +
         " |\n";
 
@@ -177,9 +247,7 @@ export default {
       }
     });
 
-    const tableText = new TextDisplayBuilder().setContent(
-      "```\n" + table + "\n```"
-    );
+    const tableText = new TextDisplayBuilder().setContent("```\n" + table + "\n```");
 
     const container = new ContainerBuilder()
       .addTextDisplayComponents(introTitle, comment)
