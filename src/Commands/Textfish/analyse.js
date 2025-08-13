@@ -170,6 +170,7 @@ export default {
       "Megablunder",
       "Forced",
       "Interesting",
+      "Inaccuracy",
     ];
 
     const tally = {};
