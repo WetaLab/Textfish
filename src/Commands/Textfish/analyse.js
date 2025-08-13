@@ -105,7 +105,7 @@ export default {
     });
 
     const fetchedInit = await interaction.channel.messages.fetch({
-      limit: amount,
+      limit: amount+1,
     });
 
     var fetched = [];
