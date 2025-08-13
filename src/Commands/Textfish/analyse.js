@@ -1,4 +1,7 @@
-import { analyzeConversationFromText } from "../../Textfish/analyzer.js";
+import {
+  analyzeConversationFromText,
+  describeImage,
+} from "../../Textfish/analyzer.js";
 import { renderConversation } from "../../Textfish/renderer.js";
 import { Classification } from "../../Textfish/analysis.js";
 import {
@@ -103,15 +106,24 @@ export default {
 
     const fetched = await interaction.channel.messages.fetch({ limit: amount });
 
-    const messagesArray = fetched
-      .filter(
-        (msg) =>
-          msg.content &&
-          msg.content.trim() !== "" &&
-          msg.author.id !== client.user.id
-      )
+    const messagesArrayInit = fetched
+      .filter((msg) => msg.author.id !== client.user.id)
       .map((msg) => `${msg.author.username}: ${msg.content}`);
 
+    var messagesArray;
+
+    messagesArrayInit.forEach(async (message) => {
+      if (message.attachment.size > 0) {
+        const attachment = message.attachments.first();
+        const description = await describeImage(attachment.url);
+        message.content += description;
+
+        messagesArray.push(message);
+      } else {
+        if (message.content.trim() == "") return;
+        messagesArray.push(message);
+      }
+    });
     const fAnalyzing = new ContainerBuilder().addTextDisplayComponents(
       new TextDisplayBuilder().setContent("Analyzing...")
     );

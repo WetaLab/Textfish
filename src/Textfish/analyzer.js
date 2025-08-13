@@ -10,6 +10,13 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
+const describeAi = new GoogleGenAI({
+  vertexai: true,
+  apiKey: process.env.GEMINI_API_KEY,
+});
+
+const axios = require("axios");
+
 import { Classification } from "./analysis.js";
 import fs from "fs";
 
@@ -67,6 +74,35 @@ Output:
 }
 
 `;
+
+export async function describeImage(url) {
+  const response = await axios.get(url, { responseType: "arraybuffer" });
+  const imageBytes = Buffer.from(response.data);
+
+  const contents = [
+    {
+      inlineData: {
+        mimeType: "image/jpeg",
+        data: imageBytes.toString("base64"),
+      },
+    },
+    {
+      text: "Describe this image in one sentence.",
+    },
+  ];
+
+  try {
+    const result = await describeAi.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents,
+    });
+
+    return "[" + result.candidates[0]?.content + "]" || "";
+  } catch (e) {
+    console.error("Error generating image description:", error);
+    return "";
+  }
+}
 
 export async function analyzeConversationFromText(conversationText) {
   console.log("Analyzing");
