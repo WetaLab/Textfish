@@ -1,7 +1,4 @@
-import {
-  analyzeConversationFromText,
-  describeImage,
-} from "../../Textfish/analyzer.js";
+import { analyzeConversationFromImage } from "../../Textfish/analyzer.js";
 import { renderConversation } from "../../Textfish/renderer.js";
 import { Classification } from "../../Textfish/analysis.js";
 import {
@@ -79,66 +76,39 @@ function convertMessages(data) {
 
 export default {
   data: new SlashCommandBuilder()
-    .setName("analyze")
-    .setDescription("Analyse x amount of sent messages.")
+    .setName("analyzescreenshot")
+    .setDescription("Analyse screenshot of a conversation")
     .setIntegrationTypes(0, 1) // Can be both 0, 1 for both guild & user install
     .setContexts(0, 1, 2)
-    .addIntegerOption((option) =>
+    .addAttachmentOption((option) =>
       option
-        .setName("messages")
-        .setDescription("The number of messages to fetch (max 10)")
         .setRequired(true)
-        .setMinValue(1)
-        .setMaxValue(10)
+        .setName("screenshot")
+        .setDescription("The image to screenshot")
     ),
 
   async execute(interaction, client) {
-    const amount = interaction.options.getInteger("messages");
-
-    const fMessagesComponent = new ContainerBuilder().addTextDisplayComponents(
-      new TextDisplayBuilder().setContent("Fetching messages...")
-    );
-
-    const sentMessage = await interaction.followUp({
-      flags: MessageFlags.IsComponentsV2,
-      components: [fMessagesComponent],
-    });
-
-    const fetchedInit = await interaction.channel.messages.fetch({
-      limit: amount,
-    });
-
-    var fetched = [];
-
-    for (const message of fetchedInit.values()) {
-      if (message.attachments.size > 0) {
-        const attachment = message.attachments.first();
-        if (attachment.contentType.split("/")[0] == "image") {
-          console.log("Getting image description");
-          const description = await describeImage(attachment.url);
-          console.log("Description", description);
-          message.content += description;
-          fetched.push(message);
-        } else {
-          if (message.content.trim() === "") continue;
-          fetched.push(message);
-        }
-      } else {
-        if (message.content.trim() === "") continue;
-        fetched.push(message);
-      }
-    }
-
-    const messagesArray = fetched
-      .filter((msg) => msg.author.id !== client.user.id)
-      .map((msg) => `${msg.author.username}: ${msg.content}`);
+    const attachmentArgument = interaction.options.getAttachment("screenshot");
+    const url = attachmentArgument.url;
 
     const fAnalyzing = new ContainerBuilder().addTextDisplayComponents(
       new TextDisplayBuilder().setContent("Analyzing...")
     );
 
-    await sentMessage.edit({ components: [fAnalyzing] });
-    const analysis = await analyzeConversationFromText(messagesArray.reverse());
+    const sentMessage = await interaction.followUp({
+      flags: MessageFlags.IsComponentsV2,
+      components: [fAnalyzing],
+    });
+    const analysis = await analyzeConversationFromImage(url);
+
+    if (analysis.validScreenshot == false) {
+      const fFailed = new ContainerBuilder().addTextDisplayComponents(
+        new TextDisplayBuilder().setContent(
+          "Provided screenshot was not valid."
+        )
+      );
+      return sentMessage.edit({ components: [fFailed] });
+    }
 
     const fTallying = new ContainerBuilder().addTextDisplayComponents(
       new TextDisplayBuilder().setContent("Tallying results & rendering...")
