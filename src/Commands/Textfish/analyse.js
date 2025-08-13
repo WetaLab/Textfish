@@ -170,7 +170,6 @@ export default {
       "Megablunder",
       "Forced",
       "Interesting",
-      "Inaccuracy",
     ];
 
     const tally = {};
@@ -193,6 +192,8 @@ export default {
 
     var tallyFormatted = {};
 
+    console.log(tally);
+
     for (const classification in tally) {
       if (unicodes[classification.toUpperCase()]) {
         tallyFormatted[
@@ -200,13 +201,16 @@ export default {
         ] = tally[classification];
       } else {
         let left = tally[classification].left;
-        let right = tally[classification].left;
+        let right = tally[classification].right;
         if (left == 0 && right == 0) {
+          console.log("Empty tally:", tally[classification], classification);
         } else {
           tallyFormatted[classification] = tally[classification];
         }
       }
     }
+
+    console.log(tallyFormatted);
 
     const rows = [
       [" ", leftHeader, rightHeader],
