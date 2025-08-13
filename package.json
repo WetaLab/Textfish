@@ -9,6 +9,7 @@
   "dependencies": {
     "@google/genai": "^1.13.0",
     "@google/generative-ai": "^0.7.0",
+    "axios": "^1.11.0",
     "canvas": "^2.11.2",
     "discord.js": "^14.15.3",
     "dotenv": "^16.6.1",

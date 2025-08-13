@@ -104,26 +104,35 @@ export default {
       components: [fMessagesComponent],
     });
 
-    const fetched = await interaction.channel.messages.fetch({ limit: amount });
+    const fetchedInit = await interaction.channel.messages.fetch({
+      limit: amount,
+    });
 
-    const messagesArrayInit = fetched
+    var fetched = [];
+
+    for (const message of fetchedInit.values()) {
+      if (message.attachments.size > 0) {
+        const attachment = message.attachments.first();
+        if (attachment.contentType.split("/")[0] == "image") {
+          console.log("Getting image description");
+          const description = await describeImage(attachment.url);
+          console.log("Description", description);
+          message.content += description;
+          fetched.push(message);
+        } else {
+          if (message.content.trim() === "") continue;
+          fetched.push(message);
+        }
+      } else {
+        if (message.content.trim() === "") continue;
+        fetched.push(message);
+      }
+    }
+
+    const messagesArray = fetched
       .filter((msg) => msg.author.id !== client.user.id)
       .map((msg) => `${msg.author.username}: ${msg.content}`);
 
-    var messagesArray;
-
-    messagesArrayInit.forEach(async (message) => {
-      if (message.attachment.size > 0) {
-        const attachment = message.attachments.first();
-        const description = await describeImage(attachment.url);
-        message.content += description;
-
-        messagesArray.push(message);
-      } else {
-        if (message.content.trim() == "") return;
-        messagesArray.push(message);
-      }
-    });
     const fAnalyzing = new ContainerBuilder().addTextDisplayComponents(
       new TextDisplayBuilder().setContent("Analyzing...")
     );

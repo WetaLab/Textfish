@@ -11,11 +11,11 @@ const ai = new GoogleGenAI({
 });
 
 const describeAi = new GoogleGenAI({
-  vertexai: true,
+  vertexai: false,
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-const axios = require("axios");
+import axios from "axios";
 
 import { Classification } from "./analysis.js";
 import fs from "fs";
@@ -87,7 +87,7 @@ export async function describeImage(url) {
       },
     },
     {
-      text: "Describe this image in one sentence.",
+      text: "Describe this image in one short sentence, only the description, nothing else. Use the format image of ...",
     },
   ];
 
@@ -97,9 +97,10 @@ export async function describeImage(url) {
       contents,
     });
 
-    return "[" + result.candidates[0]?.content + "]" || "";
+    console.log("result", result.candidates[0]?.content);
+    return "["+result.candidates[0]?.content.parts[0].text + "]" || "";
   } catch (e) {
-    console.error("Error generating image description:", error);
+    console.error("Error generating image description:", e);
     return "";
   }
 }
