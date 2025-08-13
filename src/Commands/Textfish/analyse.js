@@ -219,11 +219,14 @@ export default {
         getAccuracyString(analysis.messages, "left"),
         getAccuracyString(analysis.messages, "right"),
       ],
+      [" ", " ", " "], // Padding
       ...Object.entries(tallyFormatted).map(([classification, counts]) => [
         `${classification}`,
         counts.left.toString(),
         counts.right.toString(),
       ]),
+      [" ", " ", " "], // Padding
+
       [
         "Game Rating",
         analysis.elo.left.toString(),
