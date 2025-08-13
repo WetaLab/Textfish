@@ -82,6 +82,8 @@ User 1: We're here aren't we
 
 Opening: Analingus Attack
 Comment: A risky opening sacrifice pays off, leading to a surprisingly quick development advantage.
+
+Here are just another example of just the opening & comment:
 Opening: Catan System: Schrödinger's Pussy Variation
 Comment: A solid opening sequence, but you fumbled the transition into the middlegame by revealing your trick too early.
 `;
@@ -138,8 +140,16 @@ Output:
   ]
 }
 
+Another example:
+User 1: The one thing you should know about me is I'm kinda an asshole
+User 2: Well it's a good thing I eat ass
+User 1 :What an interesting thing to say
+User 2: It caught your attention didn't it?
+User 1: We're here aren't we
 Opening: Analingus Attack
 Comment: A risky opening sacrifice pays off, leading to a surprisingly quick development advantage.
+
+Here are just another example of just the opening & comment:
 Opening: Catan System: Schrödinger's Pussy Variation
 Comment: A solid opening sequence, but you fumbled the transition into the middlegame by revealing your trick too early.
 `;
