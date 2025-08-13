@@ -112,7 +112,6 @@ export default {
       )
       .map((msg) => `${msg.author.username}: ${msg.content}`);
 
-
     const fAnalyzing = new ContainerBuilder().addTextDisplayComponents(
       new TextDisplayBuilder().setContent("Analyzing...")
     );
@@ -129,7 +128,9 @@ export default {
     const canvas = await renderConversation(
       result,
       analysis.color.left.bubble_hex,
-      analysis.color.right.bubble_hex
+      analysis.color.right.bubble_hex,
+      analysis.color.left.text_hex,
+      analysis.color.right.text_hex
     );
     //analysis.color.left.text_hex,
     //analysis.color.right.text_hex
@@ -168,7 +169,7 @@ export default {
       "Blunder",
       "Megablunder",
       "Forced",
-      "Interesting"
+      "Interesting",
     ];
 
     const tally = {};
@@ -247,7 +248,9 @@ export default {
       }
     });
 
-    const tableText = new TextDisplayBuilder().setContent("```\n" + table + "\n```");
+    const tableText = new TextDisplayBuilder().setContent(
+      "```\n" + table + "\n```"
+    );
 
     const container = new ContainerBuilder()
       .addTextDisplayComponents(introTitle, comment)

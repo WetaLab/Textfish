@@ -22,7 +22,6 @@ const COLORS = {
   avatarBg: "#71717a",
 };
 
-
 function drawAvatar(ctx, x, y, username) {
   ctx.fillStyle = COLORS.avatarBg;
   ctx.beginPath();
@@ -104,7 +103,9 @@ async function renderMessage(
   message,
   y,
   bubbleColorLeft,
-  bubbleColorRight
+  bubbleColorRight,
+  textColorLeft,
+  textColorRight
 ) {
   ctx.font = `${FONT_SIZE}px ${FONT_FAMILY}`;
 
@@ -143,7 +144,7 @@ async function renderMessage(
   ctx.fillStyle = isRightSide ? bubbleColorRight : bubbleColorLeft;
   roundRect(ctx, bubbleX, y, bubbleWidth, bubbleHeight, BUBBLE_RADIUS, true);
 
-  ctx.fillStyle = COLORS.text;
+  ctx.fillStyle = isRightSide ? textColorRight : textColorLeft;
   ctx.textBaseline = "top";
   ctx.textAlign = "left";
   lines.forEach((line, i) => {
@@ -175,7 +176,6 @@ async function renderMessage(
       const badgeHeight = 55;
       const badgeWidth = (badgeImg.width / badgeImg.height) * badgeHeight;
 
-
       const bubbleCenterX = bubbleX + bubbleWidth / 2;
       const canvasCenterX = CANVAS_WIDTH / 2;
 
@@ -200,7 +200,9 @@ async function renderMessage(
 export async function renderConversation(
   messages,
   bubbleColorLeft,
-  bubbleColorRight
+  bubbleColorRight,
+  textColorLeft,
+  textColorRight
 ) {
   let totalHeight = PADDING;
   const ctxTmp = createCanvas(100, 100).getContext("2d");
@@ -221,7 +223,15 @@ export async function renderConversation(
 
   let y = PADDING;
   for (const msg of messages) {
-    y += await renderMessage(ctx, msg, y, bubbleColorLeft, bubbleColorRight);
+    y += await renderMessage(
+      ctx,
+      msg,
+      y,
+      bubbleColorLeft,
+      bubbleColorRight,
+      textColorLeft,
+      textColorRight
+    );
   }
 
   return canvas;
