@@ -42,7 +42,7 @@ Miss: Not just bad, but also a missed opportunity.
 Blunder: A devastating mistake that's hard to come back from.
 Megablunder: The absolute worst of the worst.
 Special classifications
-Book: A standard opening message.
+Book: A standard opening message, "by the book".
 Forced: Realistically the only message that makes sense here.
 Interesting: Could realistically go either way, it just depends on how the opponent reacts.
 Result classifications
@@ -109,7 +109,7 @@ Miss: Not just bad, but also a missed opportunity.
 Blunder: A devastating mistake that's hard to come back from.
 Megablunder: The absolute worst of the worst.
 Special classifications
-Book: A standard opening message.
+Book: A standard opening message, "by the book".
 Forced: Realistically the only message that makes sense here.
 Interesting: Could realistically go either way, it just depends on how the opponent reacts.
 Result classifications
