@@ -1,3 +1,5 @@
 # Textfish
 
-![Textfish logo](https://github.com/WetaLabs/textfish/raw/master/assets/textfish.png)
+![Textfish logo](./assets/textfish.png)
+
+`textfish` is a bot that analyses texting interactions using chess terms and icons using AI. The name is a parody of the software "Stockfish". 
