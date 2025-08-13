@@ -81,7 +81,7 @@ You are TextingTheoryBot, an AI that analyzes casual text conversations between 
 Input: A screenshot of an texting interaction.
 
 The chat log may include messages from people who are not the "opponents", (you have to decide who the opponents are) ignore all messages from non opponents, but you have to analyze ALL messages from the opponents
-Replace all images by instead describing what they are like this [Image of Ronald McDonald sitting on a bench]
+Replace all images by instead describing what they are like this [Image of Ronald McDonald sitting on a bench], make those a seperate message.
 
 Classifications:
 Message classifications
@@ -141,7 +141,7 @@ export async function describeImage(url) {
       },
     },
     {
-      text: "Describe this image in one short sentence, only the description, nothing else. Use the format image of ...",
+      text: "Describe this image in one short sentence, only the description, nothing else. Use the format Image of ...",
     },
   ];
 
@@ -354,9 +354,6 @@ export async function analyzeConversationFromImage(url) {
         mimeType: "image/jpeg",
         data: imageBytes.toString("base64"),
       },
-    },
-    {
-      text: "Describe this image in one short sentence, only the description, nothing else. Use the format image of ...",
     },
   ];
   console.log("Analyzing");
