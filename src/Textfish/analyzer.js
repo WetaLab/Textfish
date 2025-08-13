@@ -332,7 +332,7 @@ export async function analyzeConversationFromText(conversationText) {
           },
           opening_name: {
             type: Type.STRING,
-            description: "A creative opening name for the game.",
+            description: "A creative and funny opening name for the game.",
           },
           comment: {
             type: Type.STRING,
@@ -540,7 +540,7 @@ export async function analyzeConversationFromImage(url) {
           },
           opening_name: {
             type: Type.STRING,
-            description: "A creative opening name for the game.",
+            description: "A creative and funny opening name for the game.",
           },
           comment: {
             type: Type.STRING,
