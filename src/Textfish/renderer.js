@@ -130,7 +130,7 @@ async function renderMessage(
     Math.min(
       maxBubbleWidth,
       Math.max(minBubbleWidth, maxLineWidth + PADDING * 2 + 10)
-    ) + 60;
+    ) + 40; // ???
 
   const isRightSide = message.side === "right";
 
