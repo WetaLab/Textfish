@@ -76,11 +76,15 @@ function formatTally(tally) {
 }
 
 function buildTable(analysis, tallyFormatted) {
+  const leftElo = analysis.elo?.left?.toString?.() ?? "0";
+  const rightElo = analysis.elo?.right?.toString?.() ?? "0";
+  const leftOpponent = analysis.opponents?.left?.slice?.(0, 15) ?? "";
+  const rightOpponent = analysis.opponents?.right?.slice?.(0, 15) ?? "";
   const rows = [
     [
       " ",
-      analysis.opponents.left.slice(0, 15),
-      analysis.opponents.right.slice(0, 15),
+      leftOpponent,
+      rightOpponent,
     ],
     [
       "Accuracy",
@@ -96,8 +100,8 @@ function buildTable(analysis, tallyFormatted) {
     [" ", " ", " "], // Padding
     [
       "Game Rating",
-      analysis.elo.left.toString(),
-      analysis.elo.right.toString(),
+      leftElo,
+      rightElo
     ],
   ];
 
@@ -191,12 +195,17 @@ export default {
       components: [loadingContainer("Tallying results & rendering...")],
     });
     const result = convertMessages(analysis);
+    const leftBubble = analysis.color?.left?.bubble_hex ?? "#808080"; // gray
+    const rightBubble = analysis.color?.right?.bubble_hex ?? "#808080";
+    const leftText = analysis.color?.left?.text_hex ?? "#FFFFFF"; // white
+    const rightText = analysis.color?.right?.text_hex ?? "#FFFFFF";
+
     const canvas = await renderConversation(
       result,
-      analysis.color.left.bubble_hex,
-      analysis.color.right.bubble_hex,
-      analysis.color.left.text_hex,
-      analysis.color.right.text_hex
+      leftBubble,
+      rightBubble,
+      leftText,
+      rightText
     );
 
     const buffer = canvas.toBuffer("image/png");

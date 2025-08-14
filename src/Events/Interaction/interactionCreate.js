@@ -9,17 +9,17 @@ export default {
    **/
   async execute(interaction, client) {
     if (!interaction.isChatInputCommand()) return;
-    if (interaction.channel?.isDMBased()) return;
 
     const command = client.commands.get(interaction.commandName);
-    if (!command) return; 
+    if (!command) return;
+
+    if (interaction.channel?.isDMBased()) {
+      if (!command.allowDms) return;
+    }
 
     if (command.permission) {
       const member = interaction.member;
-      if (
-        !member.permissions ||
-        !member.permissions.has(command.permission)
-      ) {
+      if (!member.permissions || !member.permissions.has(command.permission)) {
         return interaction.reply({
           ephemeral: true,
           files: [`./external/assets/ACCESS DENIED.mp3`],

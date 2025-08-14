@@ -78,8 +78,12 @@ function formatTally(tally) {
 }
 
 function buildTable(analysis, tallyFormatted) {
+  const leftElo = analysis.elo?.left?.toString?.() ?? "0";
+  const rightElo = analysis.elo?.right?.toString?.() ?? "0";
+  const leftOpponent = analysis.opponents?.left?.slice?.(0, 15) ?? "";
+  const rightOpponent = analysis.opponents?.right?.slice?.(0, 15) ?? "";
   const rows = [
-    [" ", analysis.opponents.left, analysis.opponents.right],
+    [" ", leftOpponent, rightOpponent],
     [
       "Accuracy",
       getAccuracyString(analysis.messages, "left"),
@@ -92,11 +96,7 @@ function buildTable(analysis, tallyFormatted) {
       counts.right.toString(),
     ]),
     [" ", " ", " "], // padding row
-    [
-      "Game Rating",
-      analysis.elo.left.toString(),
-      analysis.elo.right.toString(),
-    ],
+    ["Game Rating", leftElo, rightElo],
   ];
 
   const colWidths = rows[0].map((_, i) =>
@@ -133,6 +133,7 @@ function loadingContainer(text) {
 // Command definition //
 ////////////////////////
 export default {
+  allowDms: true,
   data: new SlashCommandBuilder()
     .setName("analyzescreenshot")
     .setDescription("Analyse screenshot of a conversation")
@@ -169,12 +170,17 @@ export default {
     });
 
     const result = convertMessages(analysis);
+    const leftBubble = analysis.color?.left?.bubble_hex ?? "#808080"; // gray
+    const rightBubble = analysis.color?.right?.bubble_hex ?? "#808080";
+    const leftText = analysis.color?.left?.text_hex ?? "#FFFFFF"; // white
+    const rightText = analysis.color?.right?.text_hex ?? "#FFFFFF";
+
     const canvas = await renderConversation(
       result,
-      analysis.color.left.bubble_hex,
-      analysis.color.right.bubble_hex,
-      analysis.color.left.text_hex,
-      analysis.color.right.text_hex
+      leftBubble,
+      rightBubble,
+      leftText,
+      rightText
     );
     const buffer = canvas.toBuffer("image/png");
     const attachment = new AttachmentBuilder(buffer, { name: "analysis.png" });

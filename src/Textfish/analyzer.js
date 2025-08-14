@@ -125,7 +125,6 @@ const createConfig = (systemInstruction) => ({
           left: {
             type: Type.OBJECT,
             description: `Color info for the "left" player. Omit if no messages from "left".`,
-            nullable: true,
             properties: {
               label: {
                 type: Type.STRING,
@@ -145,7 +144,6 @@ const createConfig = (systemInstruction) => ({
           right: {
             description: `Color info for the "right" player. Omit if no messages from "right".`,
             type: Type.OBJECT,
-            nullable: true,
             properties: {
               label: {
                 type: Type.STRING,
