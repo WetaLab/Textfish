@@ -70,7 +70,7 @@ function convertMessages(data) {
     const username = data.opponents[msg.side] || "Unknown";
     return {
       username,
-      content: msg.content,
+      content: msg.content.replace("\n", " "),
       side: msg.side,
       classification: msg.classification.toUpperCase(),
     };
