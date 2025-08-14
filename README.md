@@ -1,3 +1,9 @@
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+
 # Textfish
 
 ![Textfish logo](./assets/textfish.png)
@@ -39,7 +45,7 @@ npm install npm@latest -g
 1. Clone the repo
 
     ```sh
-    git clone https://github.com/WetaLabs/Textfish.git
+    git clone https://github.com/WetaLab/Textfish.git
     ```
 
 2. Install NPM packages
@@ -73,3 +79,15 @@ Don't forget to give the project a star! Thanks again!
 
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
+
+
+[contributors-shield]: https://img.shields.io/github/contributors/WetaLab/Textfish?style=for-the-badge
+[contributors-url]: https://github.com/WetaLab/Textfish/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/WetaLab/Textfish?style=for-the-badge
+[forks-url]: https://github.com/WetaLab/Textfish/network/members
+[stars-shield]: https://img.shields.io/github/stars/WetaLab/Textfish?style=for-the-badge
+[stars-url]: https://github.com/WetaLab/Textfish/stargazers
+[issues-shield]: https://img.shields.io/github/issues/WetaLab/Textfish?style=for-the-badge
+[issues-url]: https://github.com/WetaLab/Textfish/issues
+[license-shield]: https://img.shields.io/github/license/WetaLab/Textfish?style=for-the-badge
+[license-url]: https://github.com/WetaLab/Textfish/blob/main/LICENSE
