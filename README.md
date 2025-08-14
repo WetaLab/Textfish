@@ -4,7 +4,7 @@
 
 `textfish` is a bot that analyses texting interactions using chess terms and icons using AI. The name is a parody of the software "Stockfish".
 
-`textfish` analyzes images of text conversations, generates a stylized review image, and posts a detailed "Game Review" comment. It leverages Google Gemini for AI analysis and a custom renderer for visuals.
+`textfish` analyzes images of text conversations, generates a stylized review image, and posts a detailed "Game Review" message. It leverages Google Gemini for AI analysis and a custom renderer for visuals.
 
 ## Examples
 
@@ -70,5 +70,6 @@ Don't forget to give the project a star! Thanks again!
 5. Open a Pull Request
 
 ## License
+
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
