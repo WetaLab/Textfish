@@ -236,3 +236,16 @@ export async function renderConversation(
 
   return canvas;
 }
+
+
+export function convertMessages(data) {
+  return data.messages.map((msg) => {
+    const username = data.opponents[msg.side] || "Unknown";
+    return {
+      username,
+      content: msg.content.replace(/[\r\n]/g, " "),
+      side: msg.side,
+      classification: msg.classification.toUpperCase(),
+    };
+  });
+}

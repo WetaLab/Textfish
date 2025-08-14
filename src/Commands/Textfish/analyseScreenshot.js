@@ -1,121 +1,173 @@
-import { analyzeConversationFromImage } from "../../Textfish/analyzer.js";
-import { renderConversation } from "../../Textfish/renderer.js";
-import { Classification } from "../../Textfish/analysis.js";
+import {
+  analyzeConversationFromImage,
+  describeImage,
+} from "../../Textfish/analyzer.js";
+import {
+  renderConversation,
+  convertMessages,
+} from "../../Textfish/renderer.js";
+import {
+  Classification,
+  unicodes,
+  CLASSIFICATION_ACCURACY_INFO,
+  getClassificationAccuracy,
+  getAccuracyString,
+} from "../../Textfish/analysis.js";
 import {
   AttachmentBuilder,
   SlashCommandBuilder,
   ContainerBuilder,
   MediaGalleryBuilder,
   TextDisplayBuilder,
-  SectionBuilder,
   SeparatorBuilder,
   SeparatorSpacingSize,
   MessageFlags,
 } from "discord.js";
 
-const unicodes = {
-  SUPERBRILLIANT: " (!!!)",
-  BRILLIANT: " (!!)",
-  GREAT: " (!)",
-  BEST: " (★)",
-  MISTAKE: " (?)",
-  MISS: " (X)",
-  BLUNDER: " (??)",
-  MEGABLUNDER: " (???)",
-};
+////////////////////////
+// Config / constants //
+////////////////////////
 
-const CLASSIFICATION_ACCURACY_INFO = {
-  SUPERBRILLIANT: { accuracy: 100, radius: 0 },
-  BRILLIANT: { accuracy: 100, radius: 0 },
-  GREAT: { accuracy: 100, radius: 0 },
-  BEST: { accuracy: 100, radius: 0 },
-  EXCELLENT: { accuracy: 99, radius: 1 },
-  GOOD: { accuracy: 96.5, radius: 1.5 },
-  BOOK: { accuracy: 100, radius: 2 },
-  INACCURACY: { accuracy: -7.5, radius: 2.5 },
-  MISTAKE: { accuracy: -15, radius: 5 },
-  MISS: { accuracy: -10, radius: 3 },
-  BLUNDER: { accuracy: -60, radius: 40 },
-  MEGABLUNDER: { accuracy: -100, radius: 0 },
-};
+const INCLUDED_CLASSIFICATIONS = [
+  "Superbrilliant",
+  "Brilliant",
+  "Great",
+  "Best",
+  "Excellent",
+  "Good",
+  "Book",
+  "Interesting",
+  "Inaccuracy",
+  "Mistake",
+  "Miss",
+  "Blunder",
+  "Megablunder",
+  "Forced",
+];
 
-function getClassificationAccuracy(classification) {
-  const { accuracy, radius } = CLASSIFICATION_ACCURACY_INFO[classification];
-  const jitter = (Math.random() * 2 - 1) * radius;
-  return Math.min(100, accuracy + jitter);
-}
+/////////////
+// Helpers //
+/////////////
+function buildTally(messages) {
+  const tally = Object.fromEntries(
+    INCLUDED_CLASSIFICATIONS.map((c) => [c, { left: 0, right: 0 }])
+  );
 
-function getAccuracyString(messages, side) {
-  const playerMessages = messages.filter((msg) => msg.side == side);
-  let totalScore = 0;
-  let classifiedMovesCount = 0;
-
-  for (const msg of playerMessages) {
-    if (CLASSIFICATION_ACCURACY_INFO[msg.classification.toUpperCase()]) {
-      totalScore += getClassificationAccuracy(msg.classification.toUpperCase());
-      classifiedMovesCount++;
+  for (const { classification, side } of messages) {
+    if (
+      INCLUDED_CLASSIFICATIONS.includes(classification) &&
+      (side === "left" || side === "right")
+    ) {
+      tally[classification][side]++;
     }
   }
-
-  if (classifiedMovesCount === 0) return "0.0";
-  const averageAccuracy = totalScore / classifiedMovesCount;
-  return Math.min(100, Math.max(0, averageAccuracy)).toFixed(1);
+  return tally;
 }
 
-function convertMessages(data) {
-  return data.messages.map((msg) => {
-    const username = data.opponents[msg.side] || "Unknown";
-    return {
-      username,
-      content: msg.content.replace(/[\r\n]/g, " "),
-      side: msg.side,
-      classification: msg.classification.toUpperCase(),
-    };
+function formatTally(tally) {
+  const formatted = {};
+  for (const [classification, counts] of Object.entries(tally)) {
+    const unicode = unicodes[classification.toUpperCase()];
+    if (unicode) {
+      formatted[`${classification}${unicode}`] = counts;
+    } else if (counts.left !== 0 || counts.right !== 0) {
+      formatted[classification] = counts;
+    }
+  }
+  return formatted;
+}
+
+function buildTable(analysis, tallyFormatted) {
+  const rows = [
+    [" ", analysis.opponents.left, analysis.opponents.right],
+    [
+      "Accuracy",
+      getAccuracyString(analysis.messages, "left"),
+      getAccuracyString(analysis.messages, "right"),
+    ],
+    [" ", " ", " "], // padding row
+    ...Object.entries(tallyFormatted).map(([classification, counts]) => [
+      classification,
+      counts.left.toString(),
+      counts.right.toString(),
+    ]),
+    [" ", " ", " "], // padding row
+    [
+      "Game Rating",
+      analysis.elo.left.toString(),
+      analysis.elo.right.toString(),
+    ],
+  ];
+
+  const colWidths = rows[0].map((_, i) =>
+    Math.max(...rows.map((row) => row[i].length))
+  );
+
+  const pad = (str, width, alignRight = false) =>
+    alignRight ? str.padStart(width) : str.padEnd(width);
+
+  let table = "";
+  rows.forEach((row, rowIndex) => {
+    table +=
+      "| " +
+      row
+        .map((cell, i) => pad(cell, colWidths[i], i > 0 && rowIndex > 0))
+        .join(" | ") +
+      " |\n";
+
+    if (rowIndex === 0) {
+      table += "|-" + colWidths.map((w) => "-".repeat(w)).join("-|-") + "-|\n";
+    }
   });
+
+  return "```\n" + table + "\n```";
 }
 
+function loadingContainer(text) {
+  return new ContainerBuilder().addTextDisplayComponents(
+    new TextDisplayBuilder().setContent(text)
+  );
+}
+
+////////////////////////
+// Command definition //
+////////////////////////
 export default {
   data: new SlashCommandBuilder()
     .setName("analyzescreenshot")
     .setDescription("Analyse screenshot of a conversation")
-    .setIntegrationTypes(0, 1) // Can be both 0, 1 for both guild & user install
+    .setIntegrationTypes(0, 1)
     .setContexts(0, 1, 2)
     .addAttachmentOption((option) =>
       option
         .setRequired(true)
         .setName("screenshot")
-        .setDescription("The image to screenshot")
+        .setDescription("The image to analyze")
     ),
 
   async execute(interaction, client) {
-    const attachmentArgument = interaction.options.getAttachment("screenshot");
-    const url = attachmentArgument.url;
-
-    const fAnalyzing = new ContainerBuilder().addTextDisplayComponents(
-      new TextDisplayBuilder().setContent("Analyzing...")
-    );
+    const screenshot = interaction.options.getAttachment("screenshot");
+    const url = screenshot.url;
 
     await interaction.reply({
       flags: MessageFlags.IsComponentsV2,
-      components: [fAnalyzing],
+      components: [loadingContainer("Analyzing...")],
       fetchReply: true,
     });
-    const analysis = await analyzeConversationFromImage(url);
 
-    if (analysis.validScreenshot == false) {
-      const fFailed = new ContainerBuilder().addTextDisplayComponents(
-        new TextDisplayBuilder().setContent(
-          "Provided screenshot was not valid."
-        )
-      );
-      return interaction.editReply({ components: [fFailed] });
+    const analysis = await analyzeConversationFromImage(url);
+    if (!analysis.validScreenshot) {
+      return interaction.editReply({
+        components: [loadingContainer("Provided screenshot was not valid.")],
+      });
     }
 
-    const fTallying = new ContainerBuilder().addTextDisplayComponents(
-      new TextDisplayBuilder().setContent("Tallying results & rendering...")
-    );
+    console.log("Analysis: ", analysis);
 
-    await interaction.editReply({ components: [fTallying] });
+    await interaction.editReply({
+      components: [loadingContainer("Tallying results & rendering...")],
+    });
+
     const result = convertMessages(analysis);
     const canvas = await renderConversation(
       result,
@@ -124,152 +176,34 @@ export default {
       analysis.color.left.text_hex,
       analysis.color.right.text_hex
     );
-    //analysis.color.left.text_hex,
-    //analysis.color.right.text_hex
-    //);
-
     const buffer = canvas.toBuffer("image/png");
     const attachment = new AttachmentBuilder(buffer, { name: "analysis.png" });
 
-    const introTitle = new TextDisplayBuilder().setContent("**✪ Game Review**");
-
-    const comment = new TextDisplayBuilder().setContent(
-      analysis.comment || "No Comment"
-    );
-
-    const chatLog = new MediaGalleryBuilder().addItems((mediaGalleryItem) =>
-      mediaGalleryItem
-        .setDescription("Overview of the chatlog")
-        .setURL("attachment://analysis.png")
-    );
-
-    const opener = new TextDisplayBuilder().setContent(
-      "*" + analysis.opening_name + "*" || "*No opener name*"
-    );
-
-    const includedClassifications = [
-      "Superbrilliant",
-      "Brilliant",
-      "Great",
-      "Best",
-      "Excellent",
-      "Good",
-      "Book",
-      "Interesting",
-      "Inaccuracy",
-      "Mistake",
-      "Miss",
-      "Blunder",
-      "Megablunder",
-      "Forced",
-    ];
-
-    const tally = {};
-    includedClassifications.forEach((c) => {
-      tally[c] = { left: 0, right: 0 };
-    });
-
-    for (const msg of analysis.messages) {
-      const { classification, side } = msg;
-      if (
-        includedClassifications.includes(classification) &&
-        (side === "left" || side === "right")
-      ) {
-        tally[classification][side]++;
-      }
-    }
-
-    const leftHeader = analysis.opponents.left;
-    const rightHeader = analysis.opponents.right;
-
-    var tallyFormatted = {};
-
-    console.log(tally);
-
-    for (const classification in tally) {
-      if (unicodes[classification.toUpperCase()]) {
-        tallyFormatted[
-          `${classification}${unicodes[classification.toUpperCase()]}`
-        ] = tally[classification];
-      } else {
-        let left = tally[classification].left;
-        let right = tally[classification].right;
-        if (left == 0 && right == 0) {
-          console.log("Empty tally:", tally[classification], classification);
-        } else {
-          tallyFormatted[classification] = tally[classification];
-        }
-      }
-    }
-
-    console.log(tallyFormatted);
-
-    const rows = [
-      [" ", leftHeader, rightHeader],
-      [
-        "Accuracy",
-        getAccuracyString(analysis.messages, "left"),
-        getAccuracyString(analysis.messages, "right"),
-      ],
-      [" ", " ", " "], // Padding
-      ...Object.entries(tallyFormatted).map(([classification, counts]) => [
-        `${classification}`,
-        counts.left.toString(),
-        counts.right.toString(),
-      ]),
-      [" ", " ", " "], // Padding
-
-      [
-        "Game Rating",
-        analysis.elo.left.toString(),
-        analysis.elo.right.toString(),
-      ],
-    ];
-
-    const colWidths = rows[0].map((_, colIndex) =>
-      Math.max(...rows.map((row) => row[colIndex].length))
-    );
-
-    const pad = (str, width, alignRight = false) =>
-      alignRight ? str.padStart(width) : str.padEnd(width);
-
-    let table = "";
-    rows.forEach((row, rowIndex) => {
-      table +=
-        "| " +
-        row
-          .map((cell, i) => {
-            // Adjust width if cell contains "★"
-            let width = colWidths[i];
-            if (cell.includes("★")) {
-              width -= 0;
-            }
-            return pad(cell, width, i > 0 && rowIndex > 0);
-          })
-          .join(" | ") +
-        " |\n";
-
-      if (rowIndex === 0) {
-        table +=
-          "|-" + colWidths.map((w) => "-".repeat(w)).join("-|-") + "-|\n";
-      }
-    });
-
-    const tableText = new TextDisplayBuilder().setContent(
-      "```\n" + table + "\n```"
-    );
+    const tally = buildTally(analysis.messages);
+    const tallyFormatted = formatTally(tally);
+    const tableText = buildTable(analysis, tallyFormatted);
 
     const container = new ContainerBuilder()
-      .addTextDisplayComponents(introTitle, comment)
+      .addTextDisplayComponents(
+        new TextDisplayBuilder().setContent("**✪ Game Review**"),
+        new TextDisplayBuilder().setContent(analysis.comment || "No Comment")
+      )
       .addSeparatorComponents(
         new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large)
       )
-      .addMediaGalleryComponents(chatLog)
-      .addTextDisplayComponents(opener)
-      .addSeparatorComponents(
-        new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large)
+      .addMediaGalleryComponents(
+        new MediaGalleryBuilder().addItems((item) =>
+          item
+            .setDescription("Overview of the chatlog")
+            .setURL("attachment://analysis.png")
+        )
       )
-      .addTextDisplayComponents(tableText);
+      .addTextDisplayComponents(
+        new TextDisplayBuilder().setContent(
+          `*${analysis.opening_name || "No opener name"}*`
+        ),
+        new TextDisplayBuilder().setContent(tableText)
+      );
 
     await interaction.editReply({
       files: [attachment],
