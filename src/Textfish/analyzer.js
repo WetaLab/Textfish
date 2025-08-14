@@ -212,7 +212,12 @@ export async function describeImage(url) {
       contents,
     });
 
-    return `[${result.candidates[0]?.content.parts[0].text || ""}]`;
+    var text = result.candidates[0]?.content.parts[0].text || "";
+    if (text.endsWith(".")) {
+      text = text.slice(0, -1); // Remove the last character
+    }
+
+    return `[${text}]`;
   } catch (e) {
     console.error("Error generating image description:", e);
     return "";
