@@ -14,7 +14,11 @@ export default {
     if (!command) return;
 
     if (interaction.channel?.isDMBased()) {
-      if (!command.allowDms) return;
+      if (!command.allowDms)
+        return interaction.reply({
+          ephemeral: true,
+          content: "This command cannot be ran in a DM.",
+        });
     }
 
     if (command.permission) {
