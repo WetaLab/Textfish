@@ -77,7 +77,11 @@ function formatTally(tally) {
 
 function buildTable(analysis, tallyFormatted) {
   const rows = [
-    [" ", analysis.opponents.left, analysis.opponents.right],
+    [
+      " ",
+      analysis.opponents.left.slice(0, 15),
+      analysis.opponents.right.slice(0, 15),
+    ],
     [
       "Accuracy",
       getAccuracyString(analysis.messages, "left"),
@@ -130,7 +134,7 @@ async function fetchMessagesWithImageDescriptions(channel, amount) {
       const attachment = message.attachments.first();
       if (attachment?.contentType?.startsWith("image")) {
         const description = await describeImage(attachment.url);
-        message.content += description;
+        message.content += " " + description;
       }
     }
     if (message.content.trim()) {
