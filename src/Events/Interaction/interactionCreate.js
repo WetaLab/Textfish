@@ -28,7 +28,7 @@ export default {
     }
 
     const deferOptions = { ephemeral: !!command.ephemeral };
-    await interaction.deferReply(deferOptions).catch(() => {});
+    //await interaction.deferReply(deferOptions).catch(() => {});
 
     try {
       await command.execute(interaction, client);
@@ -38,7 +38,7 @@ export default {
         command.rollback(interaction, client, error);
       } else {
         try {
-          await interaction.followUp({
+          await interaction.reply({
             content: "A critical error has occurred while running this action.",
             ephemeral: true,
           });

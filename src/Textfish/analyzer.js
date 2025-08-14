@@ -53,7 +53,7 @@ Resign: A player gives up.
 Timeout: A player took too long.
 Winner: A post-victory message.
 
-Example:
+Make the opening names creative, funny and somewhat insult-y. You may be explicit in writing these for comedic effect. Keep the opening names short, like in the following examples:
 
 Input:
 Bob: [Image of Triple H looking angry] Me when I see God (I'm mad at him for making girls have periods)
@@ -62,16 +62,13 @@ Bob: Lol
 Bob: I would fight him on your behalf malady *tips fedora*
 
 Output:
-{
-  "opening_name": "White Knight Opening: Self-Aware Cringe Variation",
-  "comment": "Leaning into the cringiest line imaginable is a bold, if suicidal, strategy.",
-  "messages": [
-    {"side": "right", "content": "[Image of Triple H looking angry] Me when I see God (I'm mad at him for making girls have periods)", "classification": "Good"},
-    {"side": "left", "content": "What the fuck lol", "classification": "Good"},
-    {"side": "right", "content": "Lol", "classification": "Good"},
-    {"side": "right", "content": "I would fight him on your behalf malady *tips fedora*", "classification": "Megablunder"}
-  ]
-}
+Opening name: White Knight Opening: Self-Aware Cringe Variation
+Comment: Leaning into the cringiest line imaginable is a bold, if suicidal, strategy.
+Analysis:
+[Image of Triple H looking angry] Me when I see God (I'm mad at him for making girls have periods), classification: Good
+What the fuck lol, classification: Good
+Lol, classification: Good
+I would fight him on your behalf malady *tips fedora*, classification: Megablunder
 
 Another example:
 User 1: The one thing you should know about me is I'm kinda an asshole
@@ -120,7 +117,7 @@ Resign: A player gives up.
 Timeout: A player took too long.
 Winner: A post-victory message.
 
-Example:
+Make the opening names creative, funny and somewhat insult-y. You may be explicit in writing these for comedic effect. Keep the opening names short, like in the following examples:
 
 Input:
 Bob: [Image of Triple H looking angry] Me when I see God (I'm mad at him for making girls have periods)
@@ -129,16 +126,13 @@ Bob: Lol
 Bob: I would fight him on your behalf malady *tips fedora*
 
 Output:
-{
-  "opening_name": "White Knight Opening: Self-Aware Cringe Variation",
-  "comment": "Leaning into the cringiest line imaginable is a bold, if suicidal, strategy.",
-  "messages": [
-    {"side": "right", "content": "[Image of Triple H looking angry] Me when I see God (I'm mad at him for making girls have periods)", "classification": "Good"},
-    {"side": "left", "content": "What the fuck lol", "classification": "Good"},
-    {"side": "right", "content": "Lol", "classification": "Good"},
-    {"side": "right", "content": "I would fight him on your behalf malady *tips fedora*", "classification": "Megablunder"}
-  ]
-}
+Opening name: White Knight Opening: Self-Aware Cringe Variation
+Comment: Leaning into the cringiest line imaginable is a bold, if suicidal, strategy.
+Analysis:
+[Image of Triple H looking angry] Me when I see God (I'm mad at him for making girls have periods), classification: Good
+What the fuck lol, classification: Good
+Lol, classification: Good
+I would fight him on your behalf malady *tips fedora*, classification: Megablunder
 
 Another example:
 User 1: The one thing you should know about me is I'm kinda an asshole
@@ -153,6 +147,16 @@ Here are just another example of just the opening & comment:
 Opening: Catan System: Schrödinger's Pussy Variation
 Comment: A solid opening sequence, but you fumbled the transition into the middlegame by revealing your trick too early.
 `;
+
+const dayOfWeek = new Date().toLocaleString("en-US", {
+  timeZone: "America/New_York",
+  weekday: "long",
+});
+const validClassifications = Object.values(Classification).filter((c) => {
+  if (c === Classification.MEGABLUNDER) return dayOfWeek === "Monday";
+  if (c === Classification.SUPERBRILLIANT) return dayOfWeek === "Saturday";
+  return true;
+});
 
 export async function describeImage(url) {
   const response = await axios.get(url, { responseType: "arraybuffer" });
@@ -184,197 +188,373 @@ export async function describeImage(url) {
   }
 }
 
-export async function analyzeConversationFromText(conversationText) {
-  console.log("Analyzing");
-  const dayOfWeek = new Date().toLocaleString("en-US", {
-    timeZone: "America/New_York",
-    weekday: "long",
-  });
-  const validClassifications = Object.values(Classification).filter((c) => {
-    if (c === Classification.MEGABLUNDER) return dayOfWeek === "Monday";
-    if (c === Classification.SUPERBRILLIANT) return dayOfWeek === "Saturday";
-    return true;
-  });
-  const response = await ai.models.generateContent({
-    //model: "gemini-2.5-pro",
-    model: "gemini-2.5-flash",
-    contents: conversationText.join("\n"),
-    config: {
-      temperature: 0,
-      responseMimeType: "application/json",
-      thinkingConfig: {
-        thinkingBudget: 512,
+const textConfig = {
+  temperature: 0,
+  responseMimeType: "application/json",
+  thinkingConfig: {
+    thinkingBudget: 512,
+  },
+  safetySettings: [
+    {
+      category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY,
+      threshold: HarmBlockThreshold.OFF,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+      threshold: HarmBlockThreshold.OFF,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+      threshold: HarmBlockThreshold.OFF,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+      threshold: HarmBlockThreshold.OFF,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+      threshold: HarmBlockThreshold.OFF,
+    },
+  ],
+  responseSchema: {
+    type: Type.OBJECT,
+    properties: {
+      messages: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            side: { type: Type.STRING, enum: ["left", "right"] },
+            content: { type: Type.STRING },
+            classification: {
+              type: Type.STRING,
+              enum: validClassifications,
+            },
+          },
+          required: ["side", "content", "classification"],
+        },
       },
-      safetySettings: [
-        {
-          category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY,
-          threshold: HarmBlockThreshold.OFF,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-          threshold: HarmBlockThreshold.OFF,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-          threshold: HarmBlockThreshold.OFF,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-          threshold: HarmBlockThreshold.OFF,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-          threshold: HarmBlockThreshold.OFF,
-        },
-      ],
-      responseSchema: {
+      elo: {
         type: Type.OBJECT,
+        description: "Estimated Elo ratings for the players.",
         properties: {
-          messages: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                side: { type: Type.STRING, enum: ["left", "right"] },
-                content: { type: Type.STRING },
-                classification: {
-                  type: Type.STRING,
-                  enum: validClassifications,
-                },
-              },
-              required: ["side", "content", "classification"],
-            },
+          left: {
+            type: Type.INTEGER,
+            minimum: 100,
+            maximum: 3000,
+            description: `Estimated Elo (integer) for the "left" player.`,
+            nullable: true,
           },
-          elo: {
-            type: Type.OBJECT,
-            description: "Estimated Elo ratings for the players.",
-            properties: {
-              left: {
-                type: Type.INTEGER,
-                minimum: 100,
-                maximum: 3000,
-                description: `Estimated Elo (integer) for the "left" player.`,
-                nullable: true,
-              },
-              right: {
-                type: Type.INTEGER,
-                minimum: 100,
-                maximum: 3000,
-                description: `Estimated Elo (integer) for the "right" player.`,
-                nullable: true,
-              },
-            },
-          },
-          opponents: {
-            type: Type.OBJECT,
-            description: "Opponents found within the messages",
-            properties: {
-              left: {
-                type: Type.STRING,
-                description: "The username of the left messenger",
-              },
-              right: {
-                type: Type.STRING,
-                description: "The username of the right messenger",
-              },
-            },
-          },
-          color: {
-            type: Type.OBJECT,
-            description: "Color theme for the chat display.",
-            properties: {
-              left: {
-                type: Type.OBJECT,
-                description: `Color info for the "left" player. Omit if no messages from "left".`,
-                nullable: true,
-                properties: {
-                  label: {
-                    type: Type.STRING,
-                    description: `Simple, one-word color name (e.g., "Gray")`,
-                  },
-                  bubble_hex: {
-                    type: Type.STRING,
-                    description: "Hex code for the message bubble.",
-                  },
-                  text_hex: {
-                    type: Type.STRING,
-                    description: "Hex code for the text color.",
-                  },
-                },
-                required: ["label", "bubble_hex", "text_hex"],
-              },
-              right: {
-                type: Type.OBJECT,
-                description: `Color info for the "right" player. Omit if no messages from "right".`,
-                nullable: true,
-                properties: {
-                  label: {
-                    type: Type.STRING,
-                    description: `Simple, one-word color name (e.g., "Purple")`,
-                  },
-                  bubble_hex: {
-                    type: Type.STRING,
-                    description: "Hex code for the message bubble.",
-                  },
-                  text_hex: {
-                    type: Type.STRING,
-                    description: "Hex code for the text color.",
-                  },
-                },
-                required: ["label", "bubble_hex", "text_hex"],
-              },
-              background_hex: {
-                type: Type.STRING,
-                description: "Hex code for the overall chat background.",
-              },
-            },
-            required: ["background_hex"],
-          },
-          opening_name: {
-            type: Type.STRING,
-            description: "A creative and funny opening name for the game.",
-          },
-          comment: {
-            type: Type.STRING,
-            description: "A one-sentence comment on the game.",
-          },
-          vote_target: {
-            type: Type.STRING,
-            enum: ["left", "right"],
-            description:
-              "If the Reddit post title brackets indicates a vote is being requested for one player (e.g., '[Me]', '[Left]', '[Blue]' etc.), which side ('left' or 'right') you think the vote is for. Omit if no vote is requested in the title.",
+          right: {
+            type: Type.INTEGER,
+            minimum: 100,
+            maximum: 3000,
+            description: `Estimated Elo (integer) for the "right" player.`,
             nullable: true,
           },
         },
-        required: [
-          "messages",
-          "elo",
-          "color",
-          "opening_name",
-          "comment",
-          "opponents",
-        ],
       },
-      systemInstruction: SYSTEM_PROMPT,
+      opponents: {
+        type: Type.OBJECT,
+        description: "Opponents found within the messages",
+        properties: {
+          left: {
+            type: Type.STRING,
+            description: "The username of the left messenger",
+          },
+          right: {
+            type: Type.STRING,
+            description: "The username of the right messenger",
+          },
+        },
+      },
+      color: {
+        type: Type.OBJECT,
+        description: "Color theme for the chat display.",
+        properties: {
+          left: {
+            type: Type.OBJECT,
+            description: `Color info for the "left" player. Omit if no messages from "left".`,
+            nullable: true,
+            properties: {
+              label: {
+                type: Type.STRING,
+                description: `Simple, one-word color name (e.g., "Gray")`,
+              },
+              bubble_hex: {
+                type: Type.STRING,
+                description: "Hex code for the message bubble.",
+              },
+              text_hex: {
+                type: Type.STRING,
+                description: "Hex code for the text color.",
+              },
+            },
+            required: ["label", "bubble_hex", "text_hex"],
+          },
+          right: {
+            type: Type.OBJECT,
+            description: `Color info for the "right" player. Omit if no messages from "right".`,
+            nullable: true,
+            properties: {
+              label: {
+                type: Type.STRING,
+                description: `Simple, one-word color name (e.g., "Purple")`,
+              },
+              bubble_hex: {
+                type: Type.STRING,
+                description: "Hex code for the message bubble.",
+              },
+              text_hex: {
+                type: Type.STRING,
+                description: "Hex code for the text color.",
+              },
+            },
+            required: ["label", "bubble_hex", "text_hex"],
+          },
+          background_hex: {
+            type: Type.STRING,
+            description: "Hex code for the overall chat background.",
+          },
+        },
+        required: ["background_hex"],
+      },
+      opening_name: {
+        type: Type.STRING,
+        description: "A creative and funny opening name for the game.",
+      },
+      comment: {
+        type: Type.STRING,
+        description: "A one-sentence comment on the game.",
+      },
+      vote_target: {
+        type: Type.STRING,
+        enum: ["left", "right"],
+        description:
+          "If the Reddit post title brackets indicates a vote is being requested for one player (e.g., '[Me]', '[Left]', '[Blue]' etc.), which side ('left' or 'right') you think the vote is for. Omit if no vote is requested in the title.",
+        nullable: true,
+      },
     },
+    required: [
+      "messages",
+      "elo",
+      "color",
+      "opening_name",
+      "comment",
+      "opponents",
+    ],
+  },
+  systemInstruction: SYSTEM_PROMPT,
+};
+
+export async function analyzeConversationFromText(conversationText) {
+  console.log("Analyzing");
+
+  var response = await ai.models.generateContent({
+    //model: "gemini-2.5-pro",
+    model: "gemini-2.5-pro",
+    contents: conversationText.join("\n"),
+    config: textConfig,
   });
 
-  const geminiResponseText = response.text;
+  var geminiResponseText = response.text;
   let analysis;
   try {
     analysis = JSON.parse(geminiResponseText);
   } catch (e) {
     console.error(
-      `Failed to parse Gemini JSON response: ${e}`,
+      `Failed to parse Gemini JSON response, attempting hail-mary: ${e}`,
       geminiResponseText
     );
-    return;
+
+    response = await ai.models.generateContent({
+      //model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
+      contents: conversationText.join("\n"),
+      config: textConfig,
+    });
+
+    geminiResponseText = response.text;
+    try {
+      analysis = JSON.parse(geminiResponseText);
+    } catch (e) {
+      console.error(
+        `Failed to hail-mary parse Gemini JSON response: ${e}`,
+        geminiResponseText
+      );
+      return;
+    }
   }
 
   console.log(`Parsed Gemini response: ${JSON.stringify(analysis)}`);
 
   return analysis;
 }
+
+const imageConfig = {
+  temperature: 0,
+  responseMimeType: "application/json",
+  thinkingConfig: {
+    thinkingBudget: 512,
+  },
+  safetySettings: [
+    {
+      category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY,
+      threshold: HarmBlockThreshold.OFF,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+      threshold: HarmBlockThreshold.OFF,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+      threshold: HarmBlockThreshold.OFF,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+      threshold: HarmBlockThreshold.OFF,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+      threshold: HarmBlockThreshold.OFF,
+    },
+  ],
+  responseSchema: {
+    type: Type.OBJECT,
+    properties: {
+      messages: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            side: { type: Type.STRING, enum: ["left", "right"] },
+            content: { type: Type.STRING },
+            classification: {
+              type: Type.STRING,
+              enum: validClassifications,
+            },
+          },
+          required: ["side", "content", "classification"],
+        },
+      },
+      validScreenshot: {
+        type: Type.BOOLEAN,
+        description:
+          "Is the image actually an valid screenshot of a text interaction.0",
+      },
+      elo: {
+        type: Type.OBJECT,
+        description: "Estimated Elo ratings for the players.",
+        properties: {
+          left: {
+            type: Type.INTEGER,
+            minimum: 100,
+            maximum: 3000,
+            description: `Estimated Elo (integer) for the "left" player.`,
+            nullable: true,
+          },
+          right: {
+            type: Type.INTEGER,
+            minimum: 100,
+            maximum: 3000,
+            description: `Estimated Elo (integer) for the "right" player.`,
+            nullable: true,
+          },
+        },
+      },
+      opponents: {
+        type: Type.OBJECT,
+        description: "Opponents found within the messages",
+        properties: {
+          left: {
+            type: Type.STRING,
+            description: "The username of the left messenger",
+          },
+          right: {
+            type: Type.STRING,
+            description: "The username of the right messenger",
+          },
+        },
+      },
+      color: {
+        type: Type.OBJECT,
+        description: "Color theme for the chat display.",
+        properties: {
+          left: {
+            type: Type.OBJECT,
+            description: `Color info for the "left" player. Omit if no messages from "left".`,
+            nullable: true,
+            properties: {
+              label: {
+                type: Type.STRING,
+                description: `Simple, one-word color name (e.g., "Gray")`,
+              },
+              bubble_hex: {
+                type: Type.STRING,
+                description: "Hex code for the message bubble.",
+              },
+              text_hex: {
+                type: Type.STRING,
+                description: "Hex code for the text color.",
+              },
+            },
+            required: ["label", "bubble_hex", "text_hex"],
+          },
+          right: {
+            type: Type.OBJECT,
+            description: `Color info for the "right" player. Omit if no messages from "right".`,
+            nullable: true,
+            properties: {
+              label: {
+                type: Type.STRING,
+                description: `Simple, one-word color name (e.g., "Purple")`,
+              },
+              bubble_hex: {
+                type: Type.STRING,
+                description: "Hex code for the message bubble.",
+              },
+              text_hex: {
+                type: Type.STRING,
+                description: "Hex code for the text color.",
+              },
+            },
+            required: ["label", "bubble_hex", "text_hex"],
+          },
+          background_hex: {
+            type: Type.STRING,
+            description: "Hex code for the overall chat background.",
+          },
+        },
+        required: ["background_hex"],
+      },
+      opening_name: {
+        type: Type.STRING,
+        description: "A creative and funny opening name for the game.",
+      },
+      comment: {
+        type: Type.STRING,
+        description: "A one-sentence comment on the game.",
+      },
+      vote_target: {
+        type: Type.STRING,
+        enum: ["left", "right"],
+        description:
+          "If the Reddit post title brackets indicates a vote is being requested for one player (e.g., '[Me]', '[Left]', '[Blue]' etc.), which side ('left' or 'right') you think the vote is for. Omit if no vote is requested in the title.",
+        nullable: true,
+      },
+    },
+    required: [
+      "messages",
+      "elo",
+      "color",
+      "opening_name",
+      "comment",
+      "validScreenshot",
+      "opponents",
+    ],
+  },
+  systemInstruction: SYSTEM_PROMPT_FOR_SCREENSHOTS,
+};
 
 export async function analyzeConversationFromImage(url) {
   const responseData = await axios.get(url, { responseType: "arraybuffer" });
@@ -398,186 +578,42 @@ export async function analyzeConversationFromImage(url) {
     if (c === Classification.SUPERBRILLIANT) return dayOfWeek === "Saturday";
     return true;
   });
-  const response = await ai.models.generateContent({
+  var response = await ai.models.generateContent({
     //model: "gemini-2.5-pro",
-    model: "gemini-2.5-flash",
+    model: "gemini-2.5-pro",
     contents: contents,
-    config: {
-      temperature: 0,
-      responseMimeType: "application/json",
-      thinkingConfig: {
-        thinkingBudget: 512,
-      },
-      safetySettings: [
-        {
-          category: HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY,
-          threshold: HarmBlockThreshold.OFF,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-          threshold: HarmBlockThreshold.OFF,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-          threshold: HarmBlockThreshold.OFF,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-          threshold: HarmBlockThreshold.OFF,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-          threshold: HarmBlockThreshold.OFF,
-        },
-      ],
-      responseSchema: {
-        type: Type.OBJECT,
-        properties: {
-          messages: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                side: { type: Type.STRING, enum: ["left", "right"] },
-                content: { type: Type.STRING },
-                classification: {
-                  type: Type.STRING,
-                  enum: validClassifications,
-                },
-              },
-              required: ["side", "content", "classification"],
-            },
-          },
-          validScreenshot: {
-            type: Type.BOOLEAN,
-            description:
-              "Is the image actually an valid screenshot of a text interaction.0",
-          },
-          elo: {
-            type: Type.OBJECT,
-            description: "Estimated Elo ratings for the players.",
-            properties: {
-              left: {
-                type: Type.INTEGER,
-                minimum: 100,
-                maximum: 3000,
-                description: `Estimated Elo (integer) for the "left" player.`,
-                nullable: true,
-              },
-              right: {
-                type: Type.INTEGER,
-                minimum: 100,
-                maximum: 3000,
-                description: `Estimated Elo (integer) for the "right" player.`,
-                nullable: true,
-              },
-            },
-          },
-          opponents: {
-            type: Type.OBJECT,
-            description: "Opponents found within the messages",
-            properties: {
-              left: {
-                type: Type.STRING,
-                description: "The username of the left messenger",
-              },
-              right: {
-                type: Type.STRING,
-                description: "The username of the right messenger",
-              },
-            },
-          },
-          color: {
-            type: Type.OBJECT,
-            description: "Color theme for the chat display.",
-            properties: {
-              left: {
-                type: Type.OBJECT,
-                description: `Color info for the "left" player. Omit if no messages from "left".`,
-                nullable: true,
-                properties: {
-                  label: {
-                    type: Type.STRING,
-                    description: `Simple, one-word color name (e.g., "Gray")`,
-                  },
-                  bubble_hex: {
-                    type: Type.STRING,
-                    description: "Hex code for the message bubble.",
-                  },
-                  text_hex: {
-                    type: Type.STRING,
-                    description: "Hex code for the text color.",
-                  },
-                },
-                required: ["label", "bubble_hex", "text_hex"],
-              },
-              right: {
-                type: Type.OBJECT,
-                description: `Color info for the "right" player. Omit if no messages from "right".`,
-                nullable: true,
-                properties: {
-                  label: {
-                    type: Type.STRING,
-                    description: `Simple, one-word color name (e.g., "Purple")`,
-                  },
-                  bubble_hex: {
-                    type: Type.STRING,
-                    description: "Hex code for the message bubble.",
-                  },
-                  text_hex: {
-                    type: Type.STRING,
-                    description: "Hex code for the text color.",
-                  },
-                },
-                required: ["label", "bubble_hex", "text_hex"],
-              },
-              background_hex: {
-                type: Type.STRING,
-                description: "Hex code for the overall chat background.",
-              },
-            },
-            required: ["background_hex"],
-          },
-          opening_name: {
-            type: Type.STRING,
-            description: "A creative and funny opening name for the game.",
-          },
-          comment: {
-            type: Type.STRING,
-            description: "A one-sentence comment on the game.",
-          },
-          vote_target: {
-            type: Type.STRING,
-            enum: ["left", "right"],
-            description:
-              "If the Reddit post title brackets indicates a vote is being requested for one player (e.g., '[Me]', '[Left]', '[Blue]' etc.), which side ('left' or 'right') you think the vote is for. Omit if no vote is requested in the title.",
-            nullable: true,
-          },
-        },
-        required: [
-          "messages",
-          "elo",
-          "color",
-          "opening_name",
-          "comment",
-          "validScreenshot",
-          "opponents",
-        ],
-      },
-      systemInstruction: SYSTEM_PROMPT_FOR_SCREENSHOTS,
-    },
+    config: imageConfig,
   });
 
-  const geminiResponseText = response.text;
+  var geminiResponseText = response.text;
   let analysis;
   try {
     analysis = JSON.parse(geminiResponseText);
   } catch (e) {
     console.error(
-      `Failed to parse Gemini JSON response: ${e}`,
+      `Failed to parse Gemini JSON response, attempting hail-mary: ${e}`,
       geminiResponseText
     );
-    return;
+
+    // Last hail mary
+    response = await ai.models.generateContent({
+      //model: "gemini-2.5-pro",
+      model: "gemini-2.5-flash",
+      contents: contents,
+      config: imageConfig,
+    });
+
+    geminiResponseText = response.text;
+    try {
+      analysis = JSON.parse(geminiResponseText);
+    } catch (e) {
+      console.error(
+        `Failed to hail-mary parse Gemini JSON response: ${e}`,
+        geminiResponseText
+      );
+
+      return;
+    }
   }
 
   console.log(`Parsed Gemini response: ${JSON.stringify(analysis)}`);

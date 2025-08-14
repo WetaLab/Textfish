@@ -95,9 +95,10 @@ export default {
       new TextDisplayBuilder().setContent("Analyzing...")
     );
 
-    const sentMessage = await interaction.followUp({
+    await interaction.reply({
       flags: MessageFlags.IsComponentsV2,
       components: [fAnalyzing],
+      fetchReply: true,
     });
     const analysis = await analyzeConversationFromImage(url);
 
@@ -107,14 +108,14 @@ export default {
           "Provided screenshot was not valid."
         )
       );
-      return sentMessage.edit({ components: [fFailed] });
+      return interaction.editReply({ components: [fFailed] });
     }
 
     const fTallying = new ContainerBuilder().addTextDisplayComponents(
       new TextDisplayBuilder().setContent("Tallying results & rendering...")
     );
 
-    await sentMessage.edit({ components: [fTallying] });
+    await interaction.editReply({ components: [fTallying] });
     const result = convertMessages(analysis);
     const canvas = await renderConversation(
       result,
@@ -270,7 +271,7 @@ export default {
       )
       .addTextDisplayComponents(tableText);
 
-    await sentMessage.edit({
+    await interaction.editReply({
       files: [attachment],
       components: [container],
     });

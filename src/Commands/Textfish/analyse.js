@@ -99,9 +99,10 @@ export default {
       new TextDisplayBuilder().setContent("Fetching messages...")
     );
 
-    const sentMessage = await interaction.followUp({
+    await interaction.reply({
       flags: MessageFlags.IsComponentsV2,
       components: [fMessagesComponent],
+      fetchReply: true,
     });
 
     const fetchedInit = await interaction.channel.messages.fetch({
@@ -137,14 +138,14 @@ export default {
       new TextDisplayBuilder().setContent("Analyzing...")
     );
 
-    await sentMessage.edit({ components: [fAnalyzing] });
+    await interaction.editReply({ components: [fAnalyzing] });
     const analysis = await analyzeConversationFromText(messagesArray.reverse());
 
     const fTallying = new ContainerBuilder().addTextDisplayComponents(
       new TextDisplayBuilder().setContent("Tallying results & rendering...")
     );
 
-    await sentMessage.edit({ components: [fTallying] });
+    await interaction.editReply({ components: [fTallying] });
     const result = convertMessages(analysis);
     const canvas = await renderConversation(
       result,
@@ -300,7 +301,7 @@ export default {
       )
       .addTextDisplayComponents(tableText);
 
-    await sentMessage.edit({
+    await interaction.editReply({
       files: [attachment],
       components: [container],
     });
