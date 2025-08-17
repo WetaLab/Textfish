@@ -18,15 +18,7 @@ const describeAi = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-const dayOfWeek = new Date().toLocaleString("en-US", {
-  timeZone: "America/New_York",
-  weekday: "long",
-});
-const validClassifications = Object.values(Classification).filter((c) => {
-  if (c === Classification.MEGABLUNDER) return dayOfWeek === "Monday";
-  if (c === Classification.SUPERBRILLIANT) return dayOfWeek === "Saturday";
-  return true;
-});
+const validClassifications = Object.values(Classification);
 
 const SYSTEM_PROMPT = fs.readFileSync("./prompts/text_prompt.txt", "utf-8");
 const SYSTEM_PROMPT_FOR_SCREENSHOTS = fs.readFileSync(
