@@ -31,30 +31,30 @@ Winner: A post-victory message.
 
 Make the opening names creative, funny and somewhat insult-y. You may be explicit in writing these for comedic effect. Keep the opening names short, like in the following examples:
 
-Input:
-Bob: [Image of Triple H looking angry] Me when I see God (I'm mad at him for making girls have periods)
-Alice: What the fuck lol
-Bob: Lol
-Bob: I would fight him on your behalf malady *tips fedora*
-
-Output:
-Opening name: White Knight Opening: Self-Aware Cringe Variation
+Example:
+User 1: [Image of Triple H looking angry] Me when I see God (I'm mad at him for making girls have periods) (Good)
+User 2: What the fuck lol (Good)
+User 1: Lol (Good)
+User 1: I would fight him on your behalf malady *tips fedora* (Megablunder)
+Opening: White Knight Opening: Self-Aware Cringe Variation
 Comment: Leaning into the cringiest line imaginable is a bold, if suicidal, strategy.
-Analysis:
-[Image of Triple H looking angry] Me when I see God (I'm mad at him for making girls have periods), classification: Good
-What the fuck lol, classification: Good
-Lol, classification: Good
-I would fight him on your behalf malady *tips fedora*, classification: Megablunder
 
 Another example:
-User 1: The one thing you should know about me is I'm kinda an asshole
-User 2: Well it's a good thing I eat ass
-User 1 :What an interesting thing to say
-User 2: It caught your attention didn't it?
-User 1: We're here aren't we
-Opening: Analingus Attack
+User 1: The one thing you should know about me is I'm kinda an asshole (Book)
+User 2: Well it's a good thing I eat ass (Excellent)
+User 1 :What an interesting thing to say (Good)
+User 2: It caught your attention didn't it? (Best)
+User 1: We're here aren't we (Great)
+Opening: Analingus Attack: Accepted Variation
 Comment: A risky opening sacrifice pays off, leading to a surprisingly quick development advantage.
 
-Here are just another example of just the opening & comment:
+Another example:
+User 1: hey ur really cute, and im not just saying that so i can pet your cat (Good)
+User 2: Hmmm okay I'll choose to believe you (Good)
+User 1: but if youd let me pet your kitty id be more than happy to (Excellent)
+User 2: I'm sure we could work something out (Excellent)
+User 1: and that orange colored animal with the collar seems pretty cute too (Inaccuracy)
+User 2: I knew there was a joke hidden in that lol (Good)
+User 1: as long as we can still work something out, lol (Good)
 Opening: Catan System: Schrödinger's Pussy Variation
 Comment: A solid opening sequence, but you fumbled the transition into the middlegame by revealing your trick too early.
