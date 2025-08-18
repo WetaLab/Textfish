@@ -41,10 +41,27 @@ const INCLUDED_CLASSIFICATIONS = [
 /////////////
 // Helpers //
 /////////////
-const loadingContainer = (text) =>
-  new ContainerBuilder().addTextDisplayComponents(
+function loadingContainer(text) {
+  const container = new ContainerBuilder().addTextDisplayComponents(
     new TextDisplayBuilder().setContent(text)
   );
+
+  if (text === "Analyzing...") {
+    if (Math.floor(Math.random() * 100) === 0) {
+      container.addMediaGalleryComponents(
+        new MediaGalleryBuilder().addItems((item) =>
+          item
+            .setDescription("Jarvis...")
+            .setURL(
+              "https://cdn.discordapp.com/attachments/495994825833709619/1406787521232240690/caption.gif?ex=68a3bc79&is=68a26af9&hm=ef3e4b7217512651efe9596de4935eca1dc4642f0b09a3e43f15317f683d1ab6&"
+            )
+        )
+      );
+    }
+  }
+
+  return container;
+}
 
 function buildTally(messages) {
   const tally = Object.fromEntries(
@@ -81,11 +98,7 @@ function buildTable(analysis, tallyFormatted) {
   const leftOpponent = analysis.opponents?.left?.slice?.(0, 15) ?? "";
   const rightOpponent = analysis.opponents?.right?.slice?.(0, 15) ?? "";
   const rows = [
-    [
-      " ",
-      leftOpponent,
-      rightOpponent,
-    ],
+    [" ", leftOpponent, rightOpponent],
     [
       "Accuracy",
       getAccuracyString(analysis.messages, "left"),
@@ -98,11 +111,7 @@ function buildTable(analysis, tallyFormatted) {
       counts.right.toString(),
     ]),
     [" ", " ", " "], // Padding
-    [
-      "Game Rating",
-      leftElo,
-      rightElo
-    ],
+    ["Game Rating", leftElo, rightElo],
   ];
 
   const colWidths = rows[0].map((_, colIndex) =>
@@ -174,6 +183,16 @@ export default {
       components: [loadingContainer("Fetching messages...")],
       fetchReply: true,
     });
+
+    if (!interaction.channel) {
+      return await interaction.editReply({
+        components: [
+          loadingContainer(
+            "Failed to fetch messages, do I have the proper permissions?"
+          ),
+        ],
+      });
+    }
 
     const fetched = await fetchMessagesWithImageDescriptions(
       interaction.channel,

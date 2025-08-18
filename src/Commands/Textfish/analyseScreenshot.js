@@ -124,9 +124,25 @@ function buildTable(analysis, tallyFormatted) {
 }
 
 function loadingContainer(text) {
-  return new ContainerBuilder().addTextDisplayComponents(
+  const container = new ContainerBuilder().addTextDisplayComponents(
     new TextDisplayBuilder().setContent(text)
   );
+
+  if (text === "Analyzing...") {
+    if (Math.floor(Math.random() * 100) === 0) {
+      container.addMediaGalleryComponents(
+        new MediaGalleryBuilder().addItems((item) =>
+          item
+            .setDescription("Jarvis...")
+            .setURL(
+              "https://cdn.discordapp.com/attachments/495994825833709619/1406787521232240690/caption.gif?ex=68a3bc79&is=68a26af9&hm=ef3e4b7217512651efe9596de4935eca1dc4642f0b09a3e43f15317f683d1ab6&"
+            )
+        )
+      );
+    }
+  }
+
+  return container;
 }
 
 ////////////////////////
