@@ -53,7 +53,7 @@ function loadingContainer(text) {
           item
             .setDescription("Jarvis...")
             .setURL(
-              "https://cdn.discordapp.com/attachments/495994825833709619/1406787521232240690/caption.gif?ex=68a3bc79&is=68a26af9&hm=ef3e4b7217512651efe9596de4935eca1dc4642f0b09a3e43f15317f683d1ab6&"
+              "https://i.imgur.com/qhYOGOr.gif"
             )
         )
       );
